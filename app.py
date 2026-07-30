@@ -2,57 +2,100 @@ import streamlit as st
 import numpy as np
 import joblib
 
+# ===============================
 # Configuração da página
+# ===============================
 st.set_page_config(
-    page_title="Classificador de Estresse",
+    page_title="Detector de Estresse",
     page_icon="🧠",
     layout="centered"
 )
 
+# ===============================
 # Carregamento do modelo
+# ===============================
 model = joblib.load("modelo_estresse.pkl")
 scaler = joblib.load("scaler.pkl")
 
+# ===============================
+# Barra lateral
+# ===============================
+st.sidebar.title("ℹ️ Informações")
+
+st.sidebar.info(
+"""
+### Detector de Nível de Estresse
+
+Preencha os parâmetros solicitados e clique em **Classificar**.
+
+Este sistema utiliza um modelo de Machine Learning treinado para prever o nível de estresse.
+
+Projeto desenvolvido para a disciplina de Aprendizado de Máquina.
+"""
+)
+
+# ===============================
 # Título
+# ===============================
 st.title("🧠 Classificador de Nível de Estresse")
-st.write("Preencha os parâmetros abaixo e clique em **Classificar**.")
 
+st.markdown(
+"""
+Informe os valores abaixo para realizar a classificação do nível de estresse.
+"""
+)
+
+st.divider()
+
+# ===============================
 # Formulário
-with st.form("form_predicao"):
+# ===============================
+with st.form("predicao"):
 
-    humidity = st.slider(
-        "Umidade Corporal",
-        min_value=10.0,
-        max_value=30.0,
-        value=20.0,
-        step=0.1
+    col1, col2 = st.columns(2)
+
+    with col1:
+        humidity = st.number_input(
+            "💧 Umidade Corporal",
+            min_value=10.0,
+            max_value=30.0,
+            value=20.0,
+            step=0.1
+        )
+
+        step_count = st.number_input(
+            "👣 Passos",
+            min_value=0,
+            max_value=200,
+            value=100,
+            step=1
+        )
+
+    with col2:
+        temperature = st.number_input(
+            "🌡 Temperatura (°F)",
+            min_value=75.0,
+            max_value=100.0,
+            value=88.0,
+            step=0.1
+        )
+
+    st.divider()
+
+    submitted = st.form_submit_button(
+        "🔍 Classificar",
+        use_container_width=True
     )
 
-    temperature = st.slider(
-        "Temperatura (°F)",
-        min_value=75.0,
-        max_value=100.0,
-        value=88.0,
-        step=0.1
-    )
-
-    step_count = st.slider(
-        "Passos",
-        min_value=0,
-        max_value=200,
-        value=100,
-        step=1
-    )
-
-    submitted = st.form_submit_button("🔍 Classificar")
-
-# Executa somente quando clicar no botão
+# ===============================
+# Predição
+# ===============================
 if submitted:
 
-    input_data = np.array([[humidity, temperature, step_count]])
-    input_scaled = scaler.transform(input_data)
+    entrada = np.array([[humidity, temperature, step_count]])
+    entrada = scaler.transform(entrada)
 
-    prediction = model.predict(input_scaled)[0]
+    prediction = model.predict(entrada)[0]
 
     classes = {
         0: "Baixo",
@@ -61,13 +104,38 @@ if submitted:
     }
 
     st.divider()
-    st.subheader("Resultado da Classificação")
+
+    st.subheader("🎯 Resultado")
 
     if prediction == 0:
-        st.success(f"✅ Nível detectado: **{classes[prediction]}**")
+        st.success("✅ Nível detectado: BAIXO")
 
     elif prediction == 1:
-        st.warning(f"⚠️ Nível detectado: **{classes[prediction]}**")
+        st.warning("⚠️ Nível detectado: NORMAL")
 
     else:
-        st.error(f"🚨 Nível detectado: **{classes[prediction]}**")
+        st.error("🚨 Nível detectado: ALTO")
+
+    # ==========================
+    # Probabilidades
+    # ==========================
+
+    if hasattr(model, "predict_proba"):
+
+        st.subheader("📈 Probabilidade de cada classe")
+
+        prob = model.predict_proba(entrada)[0]
+
+        st.bar_chart(
+            {
+                "Probabilidade": prob
+            }
+        )
+
+        st.write("Baixo:", f"{prob[0]*100:.2f}%")
+        st.write("Normal:", f"{prob[1]*100:.2f}%")
+        st.write("Alto:", f"{prob[2]*100:.2f}%")
+
+st.divider()
+
+st.caption("Projeto de Machine Learning desenvolvido com Streamlit.")
