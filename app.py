@@ -67,12 +67,11 @@ with st.form("predicao"):
 
     with col2:
 
-       temperature = st.number_input(
-    "🌡 Temperatura (°F)",
-    value=88.0,
+      temperature_c = st.number_input(
+    "🌡 Temperatura (°C)",
+    value=31.0,
     step=0.1
-  )
-
+)
     st.divider()
 
     submitted = st.form_submit_button(
@@ -84,6 +83,9 @@ with st.form("predicao"):
 # Predição
 # ===============================
 if submitted:
+
+    # Conversão de Celsius para Fahrenheit
+   temperature = (temperature_c * 9/5) + 32
 
     entrada = np.array([[humidity, temperature, step_count]])
     entrada = scaler.transform(entrada)
