@@ -54,30 +54,24 @@ with st.form("predicao"):
     with col1:
 
         humidity = st.number_input(
-            "💧 Umidade Corporal",
-            min_value=10.0,
-            max_value=30.0,
-            value=20.0,
-            step=0.1
-        )
+    "💧 Umidade Corporal",
+    value=20.0,
+    step=0.1
+  )
 
         step_count = st.number_input(
-            "👣 Passos",
-            min_value=0,
-            max_value=200,
-            value=100,
-            step=1
-        )
+    "👣 Passos",
+    value=100,
+    step=1
+  )
 
     with col2:
 
-        temperature = st.number_input(
-            "🌡 Temperatura (°F)",
-            min_value=75.0,
-            max_value=100.0,
-            value=88.0,
-            step=0.1
-        )
+       temperature = st.number_input(
+    "🌡 Temperatura (°F)",
+    value=88.0,
+    step=0.1
+  )
 
     st.divider()
 
