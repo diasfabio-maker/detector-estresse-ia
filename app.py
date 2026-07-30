@@ -1,5 +1,6 @@
 import streamlit as st
 import numpy as np
+import pandas as pd
 import joblib
 
 # ===============================
@@ -22,27 +23,23 @@ scaler = joblib.load("scaler.pkl")
 # ===============================
 st.sidebar.title("ℹ️ Informações")
 
-st.sidebar.info(
-"""
+st.sidebar.info("""
 ### Detector de Nível de Estresse
 
-Preencha os parâmetros solicitados e clique em **Classificar**.
+Preencha os parâmetros abaixo e clique em **Classificar**.
 
-Este sistema utiliza um modelo de Machine Learning treinado para prever o nível de estresse.
+O sistema utiliza um modelo de Machine Learning treinado para classificar o nível de estresse.
 
 Projeto desenvolvido para a disciplina de Aprendizado de Máquina.
-"""
-)
+""")
 
 # ===============================
 # Título
 # ===============================
 st.title("🧠 Classificador de Nível de Estresse")
 
-st.markdown(
-"""
-Informe os valores abaixo para realizar a classificação do nível de estresse.
-"""
+st.write(
+    "Informe os valores abaixo para realizar a classificação do nível de estresse."
 )
 
 st.divider()
@@ -55,6 +52,7 @@ with st.form("predicao"):
     col1, col2 = st.columns(2)
 
     with col1:
+
         humidity = st.number_input(
             "💧 Umidade Corporal",
             min_value=10.0,
@@ -72,6 +70,7 @@ with st.form("predicao"):
         )
 
     with col2:
+
         temperature = st.number_input(
             "🌡 Temperatura (°F)",
             min_value=75.0,
@@ -105,37 +104,40 @@ if submitted:
 
     st.divider()
 
-    st.subheader("🎯 Resultado")
+    st.subheader("🎯 Resultado da Classificação")
 
     if prediction == 0:
-        st.success("✅ Nível detectado: BAIXO")
+        st.success("✅ Nível detectado: **BAIXO**")
 
     elif prediction == 1:
-        st.warning("⚠️ Nível detectado: NORMAL")
+        st.warning("⚠️ Nível detectado: **NORMAL**")
 
     else:
-        st.error("🚨 Nível detectado: ALTO")
+        st.error("🚨 Nível detectado: **ALTO**")
 
-    # ==========================
+    # ===============================
     # Probabilidades
-    # ==========================
+    # ===============================
 
     if hasattr(model, "predict_proba"):
 
-        st.subheader("📈 Probabilidade de cada classe")
-
         prob = model.predict_proba(entrada)[0]
 
-        st.bar_chart(
-            {
-                "Probabilidade": prob
-            }
-        )
+        st.divider()
 
-        st.write("Baixo:", f"{prob[0]*100:.2f}%")
-        st.write("Normal:", f"{prob[1]*100:.2f}%")
-        st.write("Alto:", f"{prob[2]*100:.2f}%")
+        st.subheader("📊 Confiança do Modelo")
 
+        nomes = ["Baixo", "Normal", "Alto"]
+
+        for nome, p in zip(nomes, prob):
+
+            st.write(f"**{nome}** — {p*100:.2f}%")
+
+            st.progress(float(p))
+
+# ===============================
+# Rodapé
+# ===============================
 st.divider()
 
-st.caption("Projeto de Machine Learning desenvolvido com Streamlit.")
+st.caption("Projeto desenvolvido utilizando Python, Scikit-Learn e Streamlit.")
